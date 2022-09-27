@@ -96,8 +96,23 @@ def softmax_regression_epoch(X, y, theta, lr=0.1, batch=100):
         None
     """
     ### BEGIN YOUR CODE
-    pass
+    start_index = 0
+    k = theta.shape[1]
+    while start_index < len(X):
+        batch_size = batch if start_index + batch <= len(X) else len(X) - start_index
+        x_mini_batch = X[start_index: start_index + batch_size]
+        y_mini_batch = y[start_index: start_index + batch_size]
+        h = np.dot(x_mini_batch, theta)
+        z = np.exp(h) / np.expand_dims(np.sum(np.exp(h), axis=1), axis=1)
+        i_y = np.eye(k)[y_mini_batch]
+        grad = np.dot(x_mini_batch.transpose(), z - i_y)
+        theta -= lr / batch_size * grad
+        start_index += batch_size
     ### END YOUR CODE
+
+
+def relu(x):
+    return x * (x > 0)
 
 
 def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
@@ -123,7 +138,21 @@ def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
         None
     """
     ### BEGIN YOUR CODE
-    pass
+    start_index = 0
+    k = W2.shape[1]
+    while start_index < len(X):
+        batch_size = batch if start_index + batch < len(X) else len(X) - start_index
+        x_mini_batch = X[start_index: start_index + batch_size]
+        y_mini_batch = y[start_index: start_index + batch_size]
+        z1 = relu(x_mini_batch @ W1)
+        h = z1 @ W2
+        g2 = np.exp(h) / np.expand_dims(np.sum(np.exp(h), axis=1), axis=1) - np.eye(k)[y_mini_batch]
+        g1 = (z1 > 0) * (g2 @ W2.transpose())
+        grad_w1 = x_mini_batch.transpose() @ g1
+        grad_w2 = z1.transpose() @ g2
+        W1 -= lr / batch_size * grad_w1
+        W2 -= lr / batch_size * grad_w2
+        start_index += batch_size
     ### END YOUR CODE
 
 
